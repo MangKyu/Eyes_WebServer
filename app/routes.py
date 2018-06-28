@@ -25,6 +25,26 @@ def send_peer_list():
     return jsonify(data)
 
 
+@app.route("/sendImage", methods=['POST'])
+def send_image():
+    user_id = request.values.get("userId")
+    image_file = request.files.get('Image')
+
+    file_ext = os.path.splitext(image_file.filename)[1]
+    file_name = user_id + '_' + datetime.datetime.now().strftime('%Y%m%d_%H-%M-%S') + file_ext
+
+    try:
+        file_dir = os.path.join(app.config['PROFILE_FOLDER'], user_id)
+        if not os.path.isdir(file_dir):
+            os.makedirs(file_dir)
+
+    except Exception as e:
+        print(e)
+    finally:
+        file_path = os.path.join(file_dir, file_name)
+        image_file.save(file_path)
+
+
 @app.route("/getPath", methods=['GET'])
 def send_path():
     startX = request.args.get('startX')
