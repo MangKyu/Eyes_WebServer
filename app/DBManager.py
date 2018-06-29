@@ -16,55 +16,89 @@ class DBConnection:
         self.curs = self.conn.cursor(pymysql.cursors.DictCursor)
         self.create_table()
 
-    def create_table(self):
+    def create_table(self):#, user_id, patient_id):
         try:
             with self.conn.cursor() as cursor:
-                sql = 'CREATE TABLE Patient(userID VARCHAR(32), userName VARCHAR(10), userInfo VARCHAR(100), userImage VARCHAR(50), PRIMARY KEY(userID))'
-                cursor.execute(sql)
+                sql = 'CREATE TABLE User(userID VARCHAR(32), patientID VARCHAR(32), PRIMARY KEY(userID))'
+                cursor.execute(sql)#, (user_id, patient_id))
         except Exception as e:
             print(e)
 
+        try:
+            with self.conn.cursor() as cursor:
+                sql = 'CREATE TABLE Patient(patientID VARCHAR(32), patientName VARCHAR(10), patientInfo VARCHAR(100), patientImage VARCHAR(50), PRIMARY KEY(patientID))'
+                cursor.execute(sql)
+        except Exception as e:
+            print(e)
+        '''
         try:
             with self.conn.cursor() as cursor:
                 sql = 'CREATE TABLE History(callDate VARCHAR(30), latitude FLOAT, longitude FLOAT, startTime VARCHAR)'
-                #startTIme, endTime, taker
                 cursor.execute(sql)
         except Exception as e:
             print(e)
+        '''
         self.conn.commit()
 
-    def insert_patient(self, user_id, user_name, user_info, user_image):
+    def get_patient_id(self, user_id):
+        try:
+            with self.conn.cursor() as cursor:
+                sql = 'SELECT * FROM Patient WHERE userID = %s'
+                cursor.execute(sql, user_id)
+                return cursor.fetchone()
+        except Exception as e:
+            print(e)
+
+
+    def get_patient_info(self, patient_id):
+        try:
+            with self.conn.cursor() as cursor:
+                sql = 'SELECT * FROM Patient WHERE userID = %s'
+                cursor.execute(sql, patient_id)
+                return cursor.fetchone()
+        except Exception as e:
+            print(e)
+
+    def insert_user(self, user_id, patient_id):
+        try:
+            with self.conn.cursor() as cursor:
+                sql = 'INSERT INTO User(userID, patientID) VALUES (%s, %s)'
+                cursor.execute(sql, (user_id, patient_id))
+        except Exception as e:
+            print(e)
+
+    def insert_patient(self, patient_id, patient_name, patient_info, patient_image):
         with self.conn.cursor() as cursor:
             try:
-                sql = 'INSERT INTO Patient(userID, userName, userInfo, userImage) VALUES (%s, %s, %s, %s)'
-                cursor.execute(sql, (user_id, user_name, user_info, user_image))
+                sql = 'INSERT INTO Patient(patientID, patientName, patientInfo, patientImage) VALUES (%s, %s, %s, %s)'
+                cursor.execute(sql, (patient_id, patient_name, patient_info, patient_image))
                 self.conn.commit()
             except Exception as e:
                 print(e)
 
-    def get_image_path(self, user_id):
+    def get_image_path(self, patient_id):
         with self.conn.cursor() as cursor:
             try:
-                sql = 'SELECT userImage FROM Patient WHERE userID = %s'
-                cursor.execute(sql, user_id)
+                sql = 'SELECT patientImage FROM Patient WHERE patientID = %s'
+                cursor.execute(sql, patient_id)
                 return cursor.fetchone()[0]
             except Exception as e:
                 print(e)
 
-    def update_image_path(self, user_image, user_id):
+    def update_image_path(self, patient_image, patient_id):
         with self.conn.cursor() as cursor:
             try:
-                sql = 'UPDATE Patient SET userImage = %s WHERE userID = %s'
-                cursor.execute(sql, (user_image, user_id))
+                sql = 'UPDATE Patient SET patientImage = %s WHERE patientID = %s'
+                cursor.execute(sql, (patient_image, patient_id))
                 self.conn.commit()
             except Exception as e:
                 print(e)
 
-    def get_histories(self, user_id):
+    def get_histories(self, patient_id):
         with self.conn.cursor() as cursor:
             try:
-                sql = 'SELECT * FROM History WHERE userID = %s'
-                cursor.execute(sql, user_id)
+                sql = 'SELECT * FROM History WHERE patientID = %s'
+                cursor.execute(sql, patient_id)
                 return cursor.fetchall()
             except Exception as e:
                 print(e)

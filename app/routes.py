@@ -1,6 +1,6 @@
 import datetime
 from flask import render_template, request, jsonify
-from app import app
+from app import app, db
 import os
 
 PROFILE_FOLDER = os.path.join('Files', 'Profile')
@@ -17,12 +17,6 @@ def home():
 @app.route('/about')
 def about():
     return render_template('about.html')
-
-
-@app.route('/peerList', methods=['GET'])
-def send_peer_list():
-    data = {'ip': '1', 'port': '5000', 'file_hash': 'aaa'}
-    return jsonify(data)
 
 
 @app.route("/sendImage", methods=['POST'])
@@ -45,6 +39,19 @@ def send_image():
         image_file.save(file_path)
 
 
+@app.route("/getPatient", methods=['POST'])
+def get_patient():
+    user_id = request.values.get('userId')
+    patient_id = db.get_patient_id(user_id)
+    patient_info = db.get_patient_info(patient_id)
+
+    if patient_info is None:
+        return "a"
+
+    return "True"
+
+
+
 @app.route("/getPath", methods=['GET'])
 def get_path():
     '''
@@ -65,7 +72,6 @@ def get_path():
 def path():
     start_x = request.args.get('startX')
     start_y = request.args.get('startY')
-    end_x = request.args.get('endX')
-    end_y = request.args.get('endY')
-
-    return render_template('test.html', startX=start_x, startY=start_y, endX=end_x, endY=end_y)#, startX=start_x, startY=start_y, endX=end_x, endY=end_y)
+    #end_x = request.args.get('endX')
+    #end_y = request.args.get('endY')
+    return render_template('map.html', start_x=start_x, start_y=start_y)#, endX=end_x, endY=end_y)#, startX=start_x, startY=start_y, endX=end_x, endY=end_y)

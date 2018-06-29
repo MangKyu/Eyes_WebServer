@@ -922,7 +922,3 @@ class FaceClassification:
     def get_result(self):
 
         uid, accuracy = self.get_accuracy()  # , file_name)
-        print(uid)
-        if accuracy <= 0.4:
-            uid = None
-        return uid
