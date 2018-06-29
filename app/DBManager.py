@@ -2,6 +2,7 @@ import pymysql
 import datetime
 import os
 
+
 # class for connection to DataBase
 class DBConnection:
     conn = None
@@ -16,44 +17,44 @@ class DBConnection:
         self.curs = self.conn.cursor(pymysql.cursors.DictCursor)
         self.create_table()
 
-    def create_table(self):#, user_id, patient_id):
+    def create_table(self):  # , user_id, patient_id):
         try:
             with self.conn.cursor() as cursor:
                 sql = 'CREATE TABLE User(userID VARCHAR(32), patientID VARCHAR(32), PRIMARY KEY(userID))'
-                cursor.execute(sql)#, (user_id, patient_id))
+                cursor.execute(sql)  # , (user_id, patient_id))
         except Exception as e:
             print(e)
 
         try:
             with self.conn.cursor() as cursor:
-                sql = 'CREATE TABLE Patient(patientID VARCHAR(32), patientName VARCHAR(10), patientInfo VARCHAR(100), patientImage VARCHAR(50), PRIMARY KEY(patientID))'
+                sql = 'CREATE TABLE Patient(patientID VARCHAR(32), patientName VARCHAR(10), patientInfo VARCHAR(100), ' \
+                      'patientImage VARCHAR(50), PRIMARY KEY(patientID))'
                 cursor.execute(sql)
         except Exception as e:
             print(e)
-        '''
         try:
             with self.conn.cursor() as cursor:
-                sql = 'CREATE TABLE History(callDate VARCHAR(30), latitude FLOAT, longitude FLOAT, startTime VARCHAR)'
+                sql = "CREATE TABLE History(patientID VARCHAR(32), startTime VARCHAR(32), endTime VARCHAR(32), " \
+                      "handover VARCHAR(50), longitude FLOAT, latitude FLOAT) "
                 cursor.execute(sql)
         except Exception as e:
             print(e)
-        '''
+
         self.conn.commit()
 
     def get_patient_id(self, user_id):
         try:
             with self.conn.cursor() as cursor:
-                sql = 'SELECT * FROM Patient WHERE userID = %s'
+                sql = 'SELECT patientID FROM user WHERE userID = %s'
                 cursor.execute(sql, user_id)
-                return cursor.fetchone()
+                return cursor.fetchone()[0]
         except Exception as e:
             print(e)
-
 
     def get_patient_info(self, patient_id):
         try:
             with self.conn.cursor() as cursor:
-                sql = 'SELECT * FROM Patient WHERE userID = %s'
+                sql = 'SELECT * FROM Patient WHERE patientID = %s'
                 cursor.execute(sql, patient_id)
                 return cursor.fetchone()
         except Exception as e:

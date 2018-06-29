@@ -1,7 +1,8 @@
 import datetime
 from flask import render_template, request, jsonify
-from app import app, db
+from app import app, db, mapper
 import os
+from app.Model import PatientVO
 
 PROFILE_FOLDER = os.path.join('Files', 'Profile')
 FACE_FOLDER = os.path.join('Files', 'FaceImage')
@@ -44,12 +45,16 @@ def get_patient():
     user_id = request.values.get('userId')
     patient_id = db.get_patient_id(user_id)
     patient_info = db.get_patient_info(patient_id)
+    patient_vo = PatientVO.PatientVO(patient_info)
+    return jsonify(patient_vo.serialize())
 
-    if patient_info is None:
-        return "a"
 
-    return "True"
-
+@app.route("/getPatientInfo", methods=['POST'])
+def get_patient_info():
+    patient_id = request.values.get('patientId')
+    patient_histories = db.get_histories(patient_id)
+    history_list = mapper.get_histories(patient_histories)
+    return jsonify(history_list)
 
 
 @app.route("/getPath", methods=['GET'])
