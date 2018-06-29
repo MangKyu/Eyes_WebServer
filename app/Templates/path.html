@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		body {
+			background-color: #FFFFFF;
+		}
+	</style>
+	<meta charset="utf-8"/>
+	<title>길 안내</title>
+</head>
+<body>
+
+<div id="map" style="width:500px;height:500px;"></div>
+<div id="totalDistance"></div>
+<div id="totalTime"></div>
+<div id="totalFare"></div>
+<div id="taxiFare"></div>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=c52061c2a05ebab952c1aa1475fcffac"></script>
+<script>
+    var points = [];
+	var minLat = 999999.0;
+	var maxLat = -999999.0;
+	var minLng = 999999.0;
+	var maxLng = -999999.0;
+	var totalDistance = 0;
+	var totalTime = 0;
+	var totalFare = 0;
+	var taxiFare = 0;
+	var url = "http://api2.sktelecom.com/tmap/routes";
+	var version = "1";
+	var startX = {{startX}}//"126.9850380932383";
+	var startY = {{startY}}//"37.566567545861645";
+	var endX = {{endX}}//"127.10331814639885";
+	var endY = {{endY}}//"37.403049076341794";
+	var reqCoordType = "WGS84GEO";
+	var resCoordType = "WGS84GEO";
+	var tollgateFareOption = "16";
+	var href = location.href;
+	var parameters = (href.slice(href.indexOf('?') + 1, href.length)).split('&');
+	for(var i=0; i<parameters.length; i++) {
+	    var varName = parameters[i].split('=')[0];
+	    if(varName == "startX") {
+	        startX = parameters[i].split('=')[1];
+		} else if(varName == "startY") {
+	        startY = parameters[i].split('=')[1];
+		} else if(varName == "endX") {
+	        endX = parameters[i].split('=')[1];
+		} else if(varName == "endY") {
+	        endY = parameters[i].split('=')[1];
+		}
+	}
+	function getDistanceFromLatLonInKm(lat1,lng1,lat2,lng2) {
+		function deg2rad(deg) {
+			return deg * (Math.PI/180)
+		}
+		var R = 6371; // Radius of the earth in km
+		var dLat = deg2rad(lat2-lat1);  // deg2rad below
+		var dLon = deg2rad(lng2-lng1);
+		var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+		var d = R * c; // Distance in km
+		return d;
+	}
+	function post_to_url() {
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() { // 요청에 대한 콜백
+			if (xhr.readyState === xhr.DONE) { // 요청이 완료되면
+				if (xhr.status === 200 || xhr.status === 201) {
+					var res = JSON.parse(xhr.responseText);
+					for(var i=0; i<res.features.length; i++) {
+						if(res.features[i].geometry.type == "LineString") {
+							for(var j=0; j<res.features[i].geometry.coordinates.length; j++) {
+								if(points.length == 0) {
+									points.push([res.features[i].geometry.coordinates[j][1], res.features[i].geometry.coordinates[j][0]]);
+								} else if(points[points.length-1][0] != res.features[i].geometry.coordinates[j][1] ||
+										points[points.length-1][1] != res.features[i].geometry.coordinates[j][0]) {
+									points.push([res.features[i].geometry.coordinates[j][1], res.features[i].geometry.coordinates[j][0]]);
+								}
+								if(minLat > res.features[i].geometry.coordinates[j][1]) {
+									minLat = res.features[i].geometry.coordinates[j][1];
+								}
+								if(maxLat < res.features[i].geometry.coordinates[j][1]) {
+									maxLat = res.features[i].geometry.coordinates[j][1];
+								}
+								if(minLng> res.features[i].geometry.coordinates[j][0]) {
+									minLng = res.features[i].geometry.coordinates[j][0];
+								}
+								if(maxLng < res.features[i].geometry.coordinates[j][0]) {
+									maxLng = res.features[i].geometry.coordinates[j][0];
+								}
+							}
+						}
+					}
+					totalDistance = res.features[0].properties.totalDistance;
+					totalTime = res.features[0].properties.totalTime;
+					totalFare = res.features[0].properties.totalFare;
+					taxiFare = res.features[0].properties.taxiFare;
+					document.getElementById("totalDistance").innerText = totalDistance;
+					document.getElementById("totalTime").innerText = totalTime;
+					document.getElementById("totalFare").innerText = totalFare;
+					document.getElementById("taxiFare").innerText = taxiFare;
+					var container = document.getElementById('map');
+					var distY = getDistanceFromLatLonInKm(startY,0,endY,0);
+					var distX = getDistanceFromLatLonInKm(0,startX,0,endX);
+					var maxDist = distX;
+					if(distY > maxDist) {
+					    maxDist = distY;
+					}
+					var level = 13;
+					if(maxDist <= 0.1) {
+					    level = 1;
+					} else if(maxDist <= 0.15) {
+					    level = 2;
+					} else if(maxDist <= 0.25) {
+					    level = 3;
+					} else if(maxDist <= 0.5) {
+					    level = 4;
+					} else if(maxDist <= 1.25) {
+					    level = 5;
+					} else if(maxDist <= 2.5) {
+					    level = 6;
+					} else if(maxDist <= 5) {
+					    level = 7;
+					} else if(maxDist <= 10) {
+					    level = 8;
+					} else if(maxDist <= 20) {
+					    level = 9;
+					} else if(maxDist <= 40) {
+					    level = 10;
+					} else if(maxDist <= 80) {
+					    level = 11;
+					} else if(maxDist <= 160) {
+					    level = 12;
+					} else if(maxDist <= 320) {
+					    level = 13;
+					} else {
+					    level = 14;
+					}
+					var options = {
+						center: new daum.maps.LatLng((minLat+maxLat)/2, (minLng+maxLng)/2),
+						level: level
+					};
+					var map = new daum.maps.Map(container, options);
+					var linePath = [];
+					for(var i=0; i<points.length; i++) {
+						linePath.push(new daum.maps.LatLng(points[i][0], points[i][1]));
+					}
+					var startSrc = 'http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/red_b.png', // 출발 마커이미지의 주소입니다
+						startSize = new daum.maps.Size(50, 45), // 출발 마커이미지의 크기입니다
+						startOption = {
+							offset: new daum.maps.Point(15, 43) // 출발 마커이미지에서 마커의 좌표에 일치시킬 좌표를 설정합니다 (기본값은 이미지의 가운데 아래입니다)
+						};
+					// 출발 마커 이미지를 생성합니다
+					var startImage = new daum.maps.MarkerImage(startSrc, startSize, startOption);
+					var startPosition = new daum.maps.LatLng(points[0][0], points[0][1]);
+					var startMarker = new daum.maps.Marker({
+						map: map, // 출발 마커가 지도 위에 표시되도록 설정합니다
+						position: startPosition,
+						draggable: false, // 출발 마커가 드래그 가능하도록 설정합니다
+						image: startImage // 출발 마커이미지를 설정합니다
+					});
+					var arriveSrc = 'http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/blue_b.png', // 도착 마커이미지 주소입니다
+						arriveSize = new daum.maps.Size(50, 45), // 도착 마커이미지의 크기입니다
+						arriveOption = {
+							offset: new daum.maps.Point(15, 43) // 도착 마커이미지에서 마커의 좌표에 일치시킬 좌표를 설정합니다 (기본값은 이미지의 가운데 아래입니다)
+						};
+					// 도착 마커 이미지를 생성합니다
+					var arriveImage = new daum.maps.MarkerImage(arriveSrc, arriveSize, arriveOption);
+					var arrivePosition = new daum.maps.LatLng(points[points.length-1][0], points[points.length-1][1]);
+					var arriveMarker = new daum.maps.Marker({
+						map: map, // 도착 마커가 지도 위에 표시되도록 설정합니다
+						position: arrivePosition,
+						draggable: false, // 도착 마커가 드래그 가능하도록 설정합니다
+						image: arriveImage // 도착 마커이미지를 설정합니다
+					});
+					// 지도에 표시할 선을 생성합니다
+					var polyline = new daum.maps.Polyline({
+						path: linePath, // 선을 구성하는 좌표배열 입니다
+						strokeWeight: 7, // 선의 두께 입니다
+						strokeColor: '#FF0000', // 선의 색깔입니다
+						strokeOpacity: 0.9, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+						strokeStyle: 'solid' // 선의 스타일입니다
+					});
+					polyline.setMap(map);
+				}
+			}
+		};
+		var req_url = url + "?version=" + version + "&startX=" + startX + "&startY=" + startY + "&endX=" + endX + "&endY=" + endY;
+		req_url = req_url + "&reqCoordType=" + reqCoordType + "&resCoordType=" + resCoordType + "&tollgateFareOption=" + tollgateFareOption;
+		xhr.open('POST', req_url);
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.setRequestHeader('appKey', '8815e242-50e9-4d6b-8dd7-3d6e747ca00b');
+		xhr.send();
+	}
+	post_to_url()
+</script>
+
+<script>
+</script>
+
+</body>
+</html>

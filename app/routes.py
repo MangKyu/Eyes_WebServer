@@ -46,9 +46,24 @@ def send_image():
 
 
 @app.route("/getPath", methods=['GET'])
-def send_path():
+def get_path():
+    '''
+    start_x = "126.9850380932383"
+    start_y = "37.566567545861645"
+    end_x = "127.10331814639885"
+    end_y = "37.403049076341794"
+    '''
     startX = request.args.get('startX')
     startY = request.args.get('startY')
     endX = request.args.get('endX')
     endY = request.args.get('endY')
-    return render_template('path.html',startX=startX, startY=startY, endX=endX, endY=endY)
+
+    return render_template('path.html', startX=startX, startY=startY, endX=endX, endY=endY)
+
+
+@app.route("/path", methods=['GET'])
+def path():
+    start_x = request.args.get('startX')
+    start_y = request.args.get('startY')
+
+    return render_template('test.html', startX=start_x, startY=start_y)#, startX=start_x, startY=start_y, endX=end_x, endY=end_y)
