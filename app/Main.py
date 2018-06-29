@@ -4,8 +4,16 @@ if __name__ == '__main__':
     host = "192.168.43.197"
     #host = "172.16.16.115"
     app.run(host=host, debug=True, use_reloader=False, port=5000)
-    #db.insert_patient('a', 'b', 'c', 'd')
 
+    '''start_x = 126.9850380932383
+    start_y = 37.566567545861645
+    db.insert_history('aaaaaaaaaaaaaaaa', 'b', 'c', 'd', start_x, start_y)
+    db.insert_history('aaaaaaaaaaaaaaaa', 'e', 'f', 'g', start_x, start_y)
+    db.insert_history('aaaaaaaaaaaaaaaa', 'h', 'i', 'j', start_x, start_y)
+    histories = db.get_histories('aaaaaaaaaaaaaaaa')
+    print(history_list)
+    print(history_list)
+    '''
     '''
     user_id = 'c5aff6fe207207a4'
 

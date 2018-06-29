@@ -5,5 +5,5 @@ from app import FaceClassification, DBManager, ObjectMapper
 app = Flask(__name__)
 fc = FaceClassification.FaceClassification()
 db = DBManager.DBConnection()
-mapper = ObjectMapper.ObjectMapper()
+mapper = ObjectMapper
 from app.routes import *
