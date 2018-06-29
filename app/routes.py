@@ -65,5 +65,7 @@ def get_path():
 def path():
     start_x = request.args.get('startX')
     start_y = request.args.get('startY')
+    end_x = request.args.get('endX')
+    end_y = request.args.get('endY')
 
-    return render_template('test.html', startX=start_x, startY=start_y)#, startX=start_x, startY=start_y, endX=end_x, endY=end_y)
+    return render_template('test.html', startX=start_x, startY=start_y, endX=end_x, endY=end_y)#, startX=start_x, startY=start_y, endX=end_x, endY=end_y)
