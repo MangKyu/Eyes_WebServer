@@ -42,6 +42,24 @@ class DBConnection:
 
         self.conn.commit()
 
+    def get_histories(self, patient_id):
+        try:
+            with self.conn.cursor() as cursor:
+                sql = 'SELECT * FROM History WHERE parentID = %s'
+                cursor.execute(sql, patient_id)
+                return cursor.fetchall()
+        except Exception as e:
+            print(e)
+
+    def insert_history(self, patient_id, start_time, end_time, handover, longitude, latitude):
+        try:
+            with self.conn.cursor() as cursor:
+                sql = 'INSERT INTO History(patientID, startTime, endTime, handover, longitude, latitude) VALUES (%s, %s,' \
+                      '%s, %s, %f, %f)'
+                cursor.execute(sql, (patient_id, start_time, end_time, handover, longitude, latitude))
+        except Exception as e:
+            print(e)
+
     def get_patient_id(self, user_id):
         try:
             with self.conn.cursor() as cursor:
