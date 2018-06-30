@@ -71,3 +71,14 @@ def path():
     start_x = request.args.get('startX')
     start_y = request.args.get('startY')
     return render_template('map.html', start_x=start_x, start_y=start_y)
+
+
+@app.route("/getLocation", methods=['POST'])
+def get_location():
+    patient_id = request.values.get('patientId')
+    location_info = db.get_location(patient_id)
+    location_dict = {
+        'latitude': location_info[0],
+        'longitude': location_info[1]
+    }
+    return jsonify(location_dict)

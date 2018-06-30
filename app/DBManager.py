@@ -114,3 +114,11 @@ class DBConnection:
             except Exception as e:
                 print(e)
 
+    def get_location(self, patient_id):
+        with self.conn.cursor() as cursor:
+            try:
+                sql = 'SELECT latitude, longitude FROM History WHERE patientID = %s'
+                cursor.execute(sql, patient_id)
+                return cursor.fetchone()[0]
+            except Exception as e:
+                print(e)
