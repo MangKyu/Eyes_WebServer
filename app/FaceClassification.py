@@ -911,7 +911,7 @@ class FaceClassification:
             uid_label, accuracy = labels[top_k[0]], predictions[top_k[0]]
             uid_label = uid_label.split("'")[1].split('\\')[0]
 
-            dir_path = os.path.join(folder_path, 'user_photos')
+            dir_path = os.path.join(folder_path, 'Patientphotos')
             dir_list = os.listdir(dir_path)
             for dir in dir_list:
                 if dir.lower() == uid_label.lower():
@@ -920,5 +920,5 @@ class FaceClassification:
             return uid_label, accuracy
 
     def get_result(self):
-
-        uid, accuracy = self.get_accuracy()  # , file_name)
+        uid, accuracy = self.get_accuracy()
+        return uid, accuracy

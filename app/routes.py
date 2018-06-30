@@ -58,12 +58,6 @@ def get_patient_info():
 
 @app.route("/getPath", methods=['GET'])
 def get_path():
-    '''
-    start_x = "126.9850380932383"
-    start_y = "37.566567545861645"
-    end_x = "127.10331814639885"
-    end_y = "37.403049076341794"
-    '''
     startX = request.args.get('startX')
     startY = request.args.get('startY')
     endX = request.args.get('endX')
@@ -76,6 +70,4 @@ def get_path():
 def path():
     start_x = request.args.get('startX')
     start_y = request.args.get('startY')
-    #end_x = request.args.get('endX')
-    #end_y = request.args.get('endY')
-    return render_template('map.html', start_x=start_x, start_y=start_y)#, endX=end_x, endY=end_y)#, startX=start_x, startY=start_y, endX=end_x, endY=end_y)
+    return render_template('map.html', start_x=start_x, start_y=start_y)
